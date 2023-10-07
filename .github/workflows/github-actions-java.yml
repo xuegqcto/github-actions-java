@@ -5,10 +5,14 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflows_dispatch:
 
 env:
-  REGISTRY: swr.cn-east-3.myhuaweicloud.com
-  IMAGE_NAME: ${{ github.repository }}
+  REGION_ID: 'ap-southeast-3'
+  REGISTRY: swr.${{ env.REGION_ID }}.myhuaweicloud.com
+  SWR_ORGANIZATION: 'public-base'
+  #IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: 'net-box'
 
 
 jobs:
@@ -57,8 +61,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: cn-east-3@${{ secrets.HUAWEI_CN_REGISTRY_USERNAME }}
-          password: ${{ secrets.HUAWEI_CN_REGISTRY_PASSWORD }}
+          username: ${{ secrets.HUAWEI_SGP_REGISTRY_USERNAME }}
+          password: ${{ secrets.HUAWEI_SGP_REGISTRY_PASSWORD }}
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
@@ -66,7 +70,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/livechamp-cn-v2/${{env.IMAGE_NAME}}
+          images: ${{ env.REGISTRY }}/${{ SWR_ORGANIZATION }}/${{env.IMAGE_NAME}}
           tags: |
             type=sha
 
