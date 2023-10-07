@@ -6,6 +6,7 @@ on:
   pull_request:
     branches: [ "main" ]
   workflows_dispatch:
+    - master
 
 env:
   REGION_ID: 'ap-southeast-3'
