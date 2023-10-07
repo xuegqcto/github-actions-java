@@ -18,6 +18,9 @@ jobs:
   build-in-java:
     runs-on: ubuntu-latest
 
+    permissinons:
+      contents: write
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
