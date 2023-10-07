@@ -18,7 +18,7 @@ jobs:
   build-in-java:
     runs-on: ubuntu-latest
 
-    permissinons:
+    permissions:
       contents: write
 
     steps:
