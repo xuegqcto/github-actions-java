@@ -1,5 +1,5 @@
 #FROM storage.3tilabs.com/aiken/debian:jdk8
-FROM storage.3tilabs.com/aiken/base/jdk:v8-jre
+FROM swr.ap-southeast-3.myhuaweicloud.com/livechamp-sgp-v2/base/jdk:v8-jre
 ENV TZ=Asia/Shanghai \
     LANG=C.UTF-8 \
     LANGUAGE=C.UTF-8 \
