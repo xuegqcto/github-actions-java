@@ -6,7 +6,7 @@ ENV TZ=Asia/Shanghai \
 
 COPY --from=apache/skywalking-java-agent:8.11.0-alpine /skywalking/agent /skywalking/agent
 
-ADD target/xxl-job-admin-*.jar /app/app.jar
+ADD target/*.jar /app/app.jar
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
 && echo "$TZ" > /etc/timezone \
 && mkdir -p /medium/audio \
