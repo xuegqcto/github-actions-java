@@ -1,0 +1,102 @@
+name: JAVA CI with Maven
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  REGISTRY: swr.cn-east-3.myhuaweicloud.com
+  IMAGE_NAME: ${{ github.repository }}
+
+
+jobs:
+  build-in-java:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Set Up JDK 1.8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+
+
+      # Restore Maven Cache
+      # https://github.com/marketplace/actions/maven-cache
+      - name: Restore Maven cache
+        uses: skjolber/maven-cache-github-action@v1
+        with:
+          step: restore
+
+      # Build Java Jar Package
+      - name: build with Maven
+        run: mvn clean package -T 1C -Dfile.encoding=UTF-8 -Dmaven.test.skip=true -Dmaven.compile.fork=true
+        
+      - name: Save Maven Cache
+        uses: skjolber/maven-cache-github-action@v1
+        with:
+          step: save
+   
+        # Add support for more platforms with QEMU (optional)
+        # https://github.com/docker/setup-qemu-action
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Setup up Docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Login to Huawei Container Registry SWR
+      # https://github.com/marketplace/actions/docker-login
+      - name: Login To SWR ${{ env.REGISTRY }}
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: cn-east-3@${{ secrets.HUAWEI_CN_REGISTRY_USERNAME }}
+          password: ${{ secrets.HUAWEI_CN_REGISTRY_PASSWORD }}
+
+      # Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/livechamp-cn-v2/${{env.IMAGE_NAME}}
+          tags: |
+            type=sha
+
+      # Build and push
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker Image
+        id: build-and-push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Dockerfile
+          platforms: linux/amd64
+          push: true
+          provenance: false
+          sbom: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      
+      - name: UpdateImages
+        run: |
+          rm -rf kustomize
+          curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"  | bash
+          cd k8s/base
+          pwd
+          kustomize edit set image ${{ steps.meta.outputs.tags}}
+          cat kustomization.yaml
+          
+
+      - name: commit change to repo
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: commit change to repo
+        
