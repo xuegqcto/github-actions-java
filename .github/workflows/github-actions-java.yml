@@ -8,7 +8,7 @@ on:
 
 env:
   REGION_ID: 'ap-southeast-3'
-  REGISTRY: swr.${{ env.REGION_ID }}.myhuaweicloud.com
+  REGISTRY: swr.${{ REGION_ID }}.myhuaweicloud.com
   SWR_ORGANIZATION: 'public-base'
   #IMAGE_NAME: ${{ github.repository }}
   IMAGE_NAME: 'net-box'
